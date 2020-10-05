@@ -3,6 +3,8 @@
 
 #define emptyString String()
 
+String id_device;
+
 BearSSL::WiFiClientSecure net;
 BearSSL::X509List cert(cacert);
 BearSSL::X509List client_crt(client_cert);
@@ -26,6 +28,9 @@ void setupWifi() {
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, pass);
   connectToWiFi(String("Tentando conectar na rede wifi: ") + String(ssid));
+  id_device = WiFi.macAddress();
+  Serial.print("Id_Device: ");
+  Serial.println(id_device);
 }
 
 void setupSSL() {

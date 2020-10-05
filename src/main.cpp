@@ -1,55 +1,82 @@
 #include <secrets.h>
+#include <global.h>
 
-#include <wifi.h>
 #include <ntp.h>
+#include <leds.h>
+#include <wifi.h>
 #include <mqtt.h>
+#include <button.h>
 #include <rfid.h>
 
-String tag;
 
 void checkWiFiThenMQTT(void)
 {
   connectToWiFi("Checking WiFi");
   connectToMqtt();
+  if(inQueue){
+    onAlert();
+    ledState = 3;
+  }
+  else{
+    onInitial();
+    ledState = 0;
+  }
 }
 
 void setup() {
   // put your setup code here, to run once:
+  initializeGlobalVar();
+  initializeLeds();
+  onError();
   Serial.begin(115200);
   delay(500);
   Serial.println();
   Serial.println();
-
-  setupWifi();
-  NTPConnect();
-  setupSSL();
-  setupMQTT();
+  blinkLedDanger(1);
+  initButton();
+  blinkLedDanger(1);
   setupRFid();
+  blinkLedDanger(1);
+  
+  setupWifi();
+  blinkLedDanger(1);
+  NTPConnect();
+  blinkLedDanger(1);
+  setupSSL();
+  blinkLedDanger(1);
+  setupMQTT();
+  blinkLedDanger(1);
 
   connectToMqtt();
+  blinkLedDanger(1);
+
+  sendDataInitialBag(true);
+  blinkLedDanger(1);
+  onInitial();
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
-
   if(!client.connected()){
+    Serial.println("Connection MQTT not connected");
+    onError();
+    ledState = 3;
     checkWiFiThenMQTT();
   }else{
-    if(! rfid.PICC_IsNewCardPresent())
-    return;
-  
-    if(rfid.PICC_ReadCardSerial()){
-      Serial.println("Lendo Cartão!");
-      for(byte i = 0; i < rfid.uid.size; i++){
-          tag += rfid.uid.uidByte[i];
-      }
-      Serial.print("RFid read: ");
-      Serial.println(tag);
-      sendDataAddProduct(tag);
-      tag = "";
-      rfid.PICC_HaltA();
-      rfid.PCD_StopCrypto1();
-    }
     client.loop();
-  }  
+    onClick();
+    if(!inQueue && !inAttendance){
+      readRFid();
+    }
+    
+  }
+  if(ledState == 0)
+    blinkLedInitial(1);
+  else if(ledState == 1)
+    blinkLedSuccess(1);
+  else if(ledState == 2)
+    blinkLedAlert(1);
+  else if(ledState == 3)
+    blinkLedDanger(1);
+  
 }

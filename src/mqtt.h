@@ -1,20 +1,38 @@
 #include <PubSubClient.h>
 #include <ArduinoJson.h>
-
 // MQTTClient client;
 PubSubClient client(net);
 
 void messageReceivedPubSub(char *topic, byte *payload, unsigned int length)
 {
+  String recebido = "";
   Serial.print("Recebido [");
   Serial.print(topic);
   Serial.print("]: ");
   for (int i = 0; i < length; i++)
   {
-
-    Serial.print((char)payload[i]);
+    recebido +=( char)payload[i];
   }
+  Serial.println(recebido);
   Serial.println();
+  if(recebido == "\"INATTENDANCE\""){
+    Serial.println("Entrou no If");
+    if(inQueue){
+      onSuccess();
+      ledState = 1;
+      inQueue = false;
+      inAttendance = true;
+    }
+    
+  }else if (recebido == "\"FINALIZED\"")
+  {
+    inQueue = false;
+    inAttendance = false;
+    ledState = 0;
+    onInitial();
+  }
+  
+
 }
 
 void pubSubErr(int8_t MQTTErr)
@@ -48,14 +66,10 @@ void connectToMqtt(bool nonBlocking = false)
   {
     Serial.print(".");
     delay(1000);
-    Serial.print("Device Id: ");
-    Serial.println(THINGNAME);
-
-    Serial.print("User: ");
-    Serial.println(MQTT_USER);
 
     if (client.connect(THINGNAME, MQTT_USER, NULL))
     {
+      Serial.print("");
       Serial.println("conectado!");
       if (!client.subscribe(MQTT_SUB_TOPIC))
         pubSubErr(client.state());
@@ -81,14 +95,59 @@ void connectToMqtt(bool nonBlocking = false)
   }
 }
 
-void sendDataAddProduct(String value)
+void sendDataAddProduct(String rfid)
 {
   DynamicJsonDocument jsonBuffer(JSON_OBJECT_SIZE(3) + 100);
   JsonObject root = jsonBuffer.to<JsonObject>();
   JsonObject payload = root.createNestedObject("payload");
 
-  root["schema"] = "peso_smelly_cat";
-  payload["peso"] = value;
+  root["schema"] = "natubag_product";
+  payload["id_device"] = id_device;
+  payload["product_rfid"] = rfid;
+  payload["at_incl"] = ctime(&now);
+  payload["status"] = "INCL";
+
+
+  Serial.printf("Sending  [%s]: ", MQTT_PUB_TOPIC);
+  serializeJson(root, Serial);
+  Serial.println();
+  char shadow[measureJson(root) + 1];
+  serializeJson(root, shadow, sizeof(shadow));
+  if (!client.publish(MQTT_PUB_TOPIC, shadow, false))
+    pubSubErr(client.state());
+}
+
+void sendDataAddQueue(bool status)
+{
+  DynamicJsonDocument jsonBuffer(JSON_OBJECT_SIZE(3) + 100);
+  JsonObject root = jsonBuffer.to<JsonObject>();
+  JsonObject payload = root.createNestedObject("payload");
+
+  root["schema"] = "natubag_queue";
+  payload["id_device"] = id_device;
+  payload["at_incl"] = ctime(&now);
+  payload["status"] = status? "INCL" : "REMO";
+
+
+  Serial.printf("Sending  [%s]: ", MQTT_PUB_TOPIC);
+  serializeJson(root, Serial);
+  Serial.println();
+  char shadow[measureJson(root) + 1];
+  serializeJson(root, shadow, sizeof(shadow));
+  if (!client.publish(MQTT_PUB_TOPIC, shadow, false))
+    pubSubErr(client.state());
+}
+
+void sendDataInitialBag(bool active)
+{
+  DynamicJsonDocument jsonBuffer(JSON_OBJECT_SIZE(3) + 100);
+  JsonObject root = jsonBuffer.to<JsonObject>();
+  JsonObject payload = root.createNestedObject("payload");
+
+  root["schema"] = "natubag_dispo";
+  payload["id_device"] = id_device;
+  payload["active"] = active;
+  payload["at_event"] = ctime(&now);
 
   Serial.printf("Sending  [%s]: ", MQTT_PUB_TOPIC);
   serializeJson(root, Serial);

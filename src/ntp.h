@@ -23,6 +23,7 @@ void NTPConnect(void)
     Serial.print(".");
     now = time(nullptr);
   }
+  Serial.println("");
   Serial.println("feito!");
   struct tm timeinfo;
   gmtime_r(&now, &timeinfo);
