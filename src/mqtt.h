@@ -16,7 +16,6 @@ void messageReceivedPubSub(char *topic, byte *payload, unsigned int length)
   Serial.println(recebido);
   Serial.println();
   if(recebido == "\"INATTENDANCE\""){
-    Serial.println("Entrou no If");
     if(inQueue){
       onSuccess();
       ledState = 1;
@@ -30,7 +29,6 @@ void messageReceivedPubSub(char *topic, byte *payload, unsigned int length)
     inAttendance = false;
     ledState = 0;
     inInital = true;
-    onInitial();
   }
   
 

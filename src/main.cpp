@@ -49,8 +49,6 @@ void setup() {
 
   connectToMqtt();
   blinkLedDanger(1);
-  
-  onInitial();
 }
 
 void loop() {
@@ -58,6 +56,7 @@ void loop() {
   if(inInital){
     sendDataInitialBag(true);
     inInital = false;
+    onInitial();
   }
   if(!client.connected()){
     Serial.println("Connection MQTT not connected");
