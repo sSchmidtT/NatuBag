@@ -49,14 +49,16 @@ void setup() {
 
   connectToMqtt();
   blinkLedDanger(1);
-
-  sendDataInitialBag(true);
-  blinkLedDanger(1);
+  
   onInitial();
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
+  if(inInital){
+    sendDataInitialBag(true);
+    inInital = false;
+  }
   if(!client.connected()){
     Serial.println("Connection MQTT not connected");
     onError();

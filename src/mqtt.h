@@ -29,6 +29,7 @@ void messageReceivedPubSub(char *topic, byte *payload, unsigned int length)
     inQueue = false;
     inAttendance = false;
     ledState = 0;
+    inInital = true;
     onInitial();
   }
   
