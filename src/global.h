@@ -4,9 +4,11 @@
 bool inQueue;
 bool inAttendance;
 bool inInital;
+bool inInative;
 
 void initializeGlobalVar(){
     inQueue = false;
     inAttendance = false;
-    inInital = true;
+    inInital = false;
+    inInative = true;
 }

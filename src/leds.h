@@ -5,7 +5,7 @@ const uint8_t LED_ALERT = D3;
 const uint8_t LED_DANGER = D4;
 const uint8_t LED_ON = D8;
 
-int ledState = 0;
+int ledState = -1;
 
 // 0 - initial
 // 1 - success
@@ -90,4 +90,20 @@ void blinkLedSuccess(int xVezes){
         digitalWrite(LED_SUCCESS, HIGH);
         delay(blink);
     } 
+}
+
+void blinkLedInative(int xVezes){
+    delay(blink);
+    for(int i = 0; i < xVezes; i++){
+        digitalWrite(LED_ON, LOW);
+        digitalWrite(LED_DANGER, LOW);
+        digitalWrite(LED_ALERT, LOW);
+        digitalWrite(LED_SUCCESS, LOW);
+        delay(blink);
+        digitalWrite(LED_ON, HIGH);
+        digitalWrite(LED_DANGER, HIGH);
+        digitalWrite(LED_ALERT, HIGH);
+        digitalWrite(LED_SUCCESS, HIGH);
+        delay(blink);
+    }
 }

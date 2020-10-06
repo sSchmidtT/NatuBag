@@ -66,12 +66,14 @@ void loop() {
   }else{
     client.loop();
     onClick();
-    if(!inQueue && !inAttendance){
+    if(!inInative && !inQueue && !inAttendance){
       readRFid();
     }
     
   }
-  if(ledState == 0)
+  if(ledState == -1)
+    blinkLedInative(1);
+  else if(ledState == 0)
     blinkLedInitial(1);
   else if(ledState == 1)
     blinkLedSuccess(1);

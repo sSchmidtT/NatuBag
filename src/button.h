@@ -30,7 +30,12 @@ void onClick(){
         Serial.print("Duração do click: ");
         Serial.println(duration);
 
-        if(!inQueue && duration > 300){
+        if(inInative && duration > 300){
+            inInative = false;
+            ledState = 0;
+            inInital = true;
+        }
+        else if(!inQueue && duration > 300){
             Serial.println("Pedido para entrar em fila para caixa!!!");
             onAlert();
             inQueue = true;

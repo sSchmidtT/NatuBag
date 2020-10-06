@@ -27,8 +27,9 @@ void messageReceivedPubSub(char *topic, byte *payload, unsigned int length)
   {
     inQueue = false;
     inAttendance = false;
-    ledState = 0;
-    inInital = true;
+    ledState = -1;
+    inInital = false;
+    inInative = true;
   }
   
 
@@ -103,7 +104,6 @@ void sendDataAddProduct(String rfid)
   root["schema"] = "natubag_product";
   payload["id_device"] = id_device;
   payload["product_rfid"] = rfid;
-  payload["at_incl"] = ctime(&now);
   payload["status"] = "INCL";
 
 
@@ -124,7 +124,6 @@ void sendDataAddQueue(bool status)
 
   root["schema"] = "natubag_queue";
   payload["id_device"] = id_device;
-  payload["at_incl"] = ctime(&now);
   payload["status"] = status? "INCL" : "REMO";
 
 
@@ -146,7 +145,6 @@ void sendDataInitialBag(bool active)
   root["schema"] = "natubag_dispo";
   payload["id_device"] = id_device;
   payload["active"] = active;
-  payload["at_event"] = ctime(&now);
 
   Serial.printf("Sending  [%s]: ", MQTT_PUB_TOPIC);
   serializeJson(root, Serial);
